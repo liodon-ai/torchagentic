@@ -1,352 +1,319 @@
 # TorchAgentic
 
-A PyTorch-based library for building AI agents and agentic workflows.
+**PyTorch Model Definitions for AI Agents**
 
-## Overview
+A comprehensive library of neural network architectures for building trainable AI agents, including reinforcement learning models, transformer-based agents, memory-augmented networks, and multi-agent systems.
 
-TorchAgentic provides a comprehensive framework for creating, managing, and orchestrating AI agents with support for:
+## Features
 
-- 🤖 **Agent System** - Create intelligent agents powered by LLMs
-- 🔧 **Tool Calling** - Equip agents with custom tools and functions
-- 🧠 **Memory Management** - Short-term and long-term memory systems
-- ⚙️ **Workflow Orchestration** - Multi-step task automation
-- 🔄 **Multi-Agent Systems** - Collaborative agent workflows
-- 🏃 **Local LLM Support** - Run models locally with PyTorch
+- 🧠 **Core Architectures** - MLP, CNN, RNN/LSTM/GRU backbones
+- 🎮 **RL Models** - DQN, PPO, A3C, SAC, TD3
+- 🔄 **Transformers** - Decision Transformer, Perceiver IO
+- 💾 **Memory Networks** - NTM, DNC (Differentiable Neural Computer)
+- 👥 **Multi-Agent** - MADDPG, QMIX, VDN
+- ⚡ **Utilities** - Initialization, normalization, distributions
 
 ## Installation
 
-### Basic Installation
-
 ```bash
+# Basic installation
 pip install torchagentic
-```
 
-### With LLM Support
+# With transformer support
+pip install torchagentic[transformers]
 
-```bash
-pip install torchagentic[llm]
-```
-
-### Full Installation
-
-```bash
+# Full installation
 pip install torchagentic[full]
-```
 
-### Development Installation
-
-```bash
+# Development installation
 pip install torchagentic[dev]
 ```
 
 ## Quick Start
 
-### Creating a Simple Agent
+### DQN Agent
 
 ```python
-import asyncio
-from torchagentic import Agent
-from torchagentic.llms.local import LocalLLM
+import torch
+from torchagentic import DQN, NatureCNN
 
-async def main():
-    # Create a local LLM
-    llm = LocalLLM(model_id="microsoft/phi-2")
+# Create DQN model for Atari
+model = DQN(
+    config=ModelConfig(input_dim=4, action_dim=6),  # 4 stacked frames, 6 actions
+    image_input=True,
+)
+
+# Forward pass
+observations = torch.randn(32, 4, 84, 84)  # (batch, channels, height, width)
+q_values = model.get_q_values(observations)
+
+# Get action
+action = model.get_action(observations, epsilon=0.1)
+```
+
+### PPO Actor-Critic
+
+```python
+from torchagentic import PPOActorCritic, ModelConfig
+
+# Create actor-critic for continuous control
+model = PPOActorCritic(
+    config=ModelConfig(
+        input_dim=24,      # Observation dim
+        action_dim=4,      # Action dim
+        hidden_dims=[256, 256],
+    ),
+    continuous=True,
+)
+
+# Get action and value
+observation = torch.randn(1, 24)
+action, log_prob, entropy, value = model.get_action_and_value(observation)
+```
+
+### Decision Transformer
+
+```python
+from torchagentic import DecisionTransformer
+
+# Create Decision Transformer for offline RL
+model = DecisionTransformer(
+    config=ModelConfig(input_dim=17, action_dim=3),
+    embed_dim=128,
+    num_layers=3,
+    max_seq_len=20,
+)
+
+# Forward with trajectory
+states = torch.randn(1, 10, 17)
+actions = torch.randn(1, 10, 3)
+returns_to_go = torch.ones(1, 10, 1) * 100
+
+predicted_actions = model(states, actions, returns_to_go)
+```
+
+### Neural Turing Machine
+
+```python
+from torchagentic import NeuralTuringMachine
+
+# Create NTM
+ntm = NeuralTuringMachine(
+    input_size=10,
+    memory_size=128,
+    memory_dim=64,
+    num_reads=4,
+    num_writes=1,
+)
+
+# Process sequence
+inputs = torch.randn(1, 50, 10)  # (batch, seq_len, input_dim)
+outputs = []
+hidden = None
+
+for t in range(inputs.shape[1]):
+    x = inputs[:, t:t+1, :]
+    output, hidden = ntm(x, hidden)
+    outputs.append(output)
+```
+
+### Multi-Agent (MADDPG)
+
+```python
+from torchagentic import MADDPGAgent
+
+# Create MADDPG for 3 agents
+model = MADDPGAgent(
+    num_agents=3,
+    obs_dim=10,
+    action_dim=2,
+    hidden_dims=[256, 256],
+    shared_params=True,
+)
+
+# Get actions
+observations = torch.randn(32, 3, 10)  # (batch, num_agents, obs_dim)
+actions = model.get_actions(observations)
+
+# Get centralized Q-value
+q_value = model.get_q_value(observations, actions)
+```
+
+## Model Zoo
+
+### Core Architectures
+
+| Model | Description | Use Case |
+|-------|-------------|----------|
+| `MLPNetwork` | Multi-layer perceptron | Simple environments |
+| `CNNNetwork` | Convolutional network | Visual observations |
+| `NatureCNN` | Nature DQN architecture | Atari games |
+| `ResNetNetwork` | Residual CNN | Complex visual tasks |
+| `LSTMAgent` | LSTM-based agent | Sequential decisions |
+| `GRUAgent` | GRU-based agent | Sequential decisions |
+
+### RL Models
+
+| Model | Algorithm | Action Space |
+|-------|-----------|--------------|
+| `DQN` | Deep Q-Network | Discrete |
+| `DuelingDQN` | Dueling DQN | Discrete |
+| `NoisyDQN` | Noisy Nets DQN | Discrete |
+| `PPOActorCritic` | PPO | Both |
+| `A3CNetwork` | A3C | Both |
+| `SACActor` | SAC | Continuous |
+| `TD3Actor` | TD3 | Continuous |
+
+### Transformer Models
+
+| Model | Description | Use Case |
+|-------|-------------|----------|
+| `TransformerAgent` | Self-attention agent | Sequential tasks |
+| `DecisionTransformer` | Offline RL transformer | Offline RL |
+| `PerceiverAgent` | Perceiver IO | Large inputs |
+
+### Memory Networks
+
+| Model | Description | Use Case |
+|-------|-------------|----------|
+| `NeuralTuringMachine` | NTM | Memory tasks |
+| `DifferentiableNeuralComputer` | DNC | Complex memory |
+
+### Multi-Agent
+
+| Model | Algorithm | Cooperation |
+|-------|-----------|-------------|
+| `MADDPGAgent` | MADDPG | Mixed |
+| `QMIXNetwork` | QMIX | Cooperative |
+| `VDNNetwork` | VDN | Cooperative |
+
+## Training Example
+
+### PPO Training Loop
+
+```python
+import torch
+from torchagentic import PPOActorCritic, ModelConfig
+
+# Create model
+model = PPOActorCritic(
+    config=ModelConfig(input_dim=8, action_dim=2, hidden_dims=[64, 64]),
+    continuous=False,
+)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
+
+# Training step
+def ppo_update(observations, actions, old_log_probs, advantages, returns):
+    # Get new log probs and values
+    log_probs, entropies, values = model.evaluate_actions(observations, actions)
     
-    # Create an agent
-    agent = Agent(
-        llm=llm,
-        system_prompt="You are a helpful assistant.",
-        verbose=True,
-    )
+    # Policy loss
+    ratio = torch.exp(log_probs - old_log_probs)
+    surr1 = ratio * advantages
+    surr2 = ratio.clamp(0.8, 1.2) * advantages
+    policy_loss = -torch.min(surr1, surr2).mean()
     
-    # Chat with the agent
-    response = await agent.act("Hello! What can you do?")
-    print(response.content)
-
-asyncio.run(main())
-```
-
-### Adding Tools to an Agent
-
-```python
-from torchagentic import Agent, tool
-from torchagentic.llms.local import LocalLLM
-
-# Define a custom tool
-@tool()
-def calculate_bmi(weight: float, height: float) -> float:
-    """Calculate BMI from weight (kg) and height (m)."""
-    return weight / (height ** 2)
-
-# Create agent with tools
-llm = LocalLLM(model_id="microsoft/phi-2")
-agent = Agent(llm=llm, tools=[calculate_bmi])
-
-# The agent can now use the calculate_bmi tool
-response = await agent.act("Calculate BMI for weight 70kg and height 1.75m")
-```
-
-### Using Memory
-
-```python
-from torchagentic import Agent, ShortTermMemory, LongTermMemory
-from torchagentic.llms.local import LocalLLM
-
-llm = LocalLLM(model_id="microsoft/phi-2")
-
-# Create memory systems
-short_term = ShortTermMemory(capacity=100)
-long_term = LongTermMemory(capacity=1000, storage_path="memory.json")
-
-# Create agent with memory
-agent = Agent(llm=llm, memory=short_term)
-```
-
-### Creating Workflows
-
-```python
-from torchagentic.workflows import Workflow, Orchestrator
-
-# Create orchestrator
-orchestrator = Orchestrator()
-
-# Create workflow
-workflow = orchestrator.create_workflow(name="Data Processing")
-
-# Add tasks
-@workflow.add_task(name="Load Data", func=load_data)
-@workflow.add_task(name="Process Data", func=process_data, dependencies=["Load Data"])
-@workflow.add_task(name="Save Results", func=save_results, dependencies=["Process Data"])
-
-# Execute workflow
-results = await workflow.execute()
-```
-
-## Core Components
-
-### Agents
-
-The `Agent` class is the core component for creating AI agents:
-
-```python
-from torchagentic import Agent
-
-agent = Agent(
-    llm=llm,                    # LLM to use
-    name="my-agent",            # Agent name
-    system_prompt="...",        # System prompt
-    tools=[...],                # List of tools
-    memory=memory,              # Memory system
-    max_iterations=10,          # Max tool execution iterations
-    temperature=0.7,            # LLM temperature
-    verbose=True,               # Enable verbose output
-)
-```
-
-### Tools
-
-Tools extend agent capabilities:
-
-```python
-from torchagentic import tool, Tool
-
-# Using decorator
-@tool()
-def search_web(query: str) -> str:
-    """Search the web for information."""
-    # Implementation
-    return results
-
-# Using class
-class CustomTool(Tool):
-    def __init__(self):
-        super().__init__(
-            name="custom_tool",
-            description="Does something useful",
-        )
+    # Value loss
+    value_loss = (values - returns).pow(2).mean()
     
-    async def execute(self, **kwargs):
-        # Implementation
-        return result
+    # Entropy bonus
+    entropy_bonus = entropies.mean() * 0.01
+    
+    # Total loss
+    loss = policy_loss + value_loss * 0.5 - entropy_bonus
+    
+    optimizer.zero_grad()
+    loss.backward()
+    torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+    optimizer.step()
+    
+    return loss.item()
 ```
 
-### Built-in Tools
-
-- `CalculatorTool` - Mathematical calculations
-- `DateTimeTool` - Date and time utilities
-- `FileReadTool` / `FileWriteTool` - File operations
-- `SearchTool` - Text search with regex
-- `PythonREPLTool` - Python code execution
-- `ShellCommandTool` - Shell command execution
-
-### Memory
-
-Two types of memory systems:
+### DQN Training Loop
 
 ```python
-from torchagentic import ShortTermMemory, LongTermMemory
+import torch
+from torchagentic import DQN, ModelConfig
+import torch.nn.functional as F
 
-# Short-term memory (fast, limited capacity)
-short_term = ShortTermMemory(
-    capacity=100,
-    ttl=3600,  # 1 hour
-)
+# Create models
+policy_net = DQN(config=ModelConfig(input_dim=4, action_dim=2), image_input=False)
+target_net = DQN(config=ModelConfig(input_dim=4, action_dim=2), image_input=False)
+target_net.load_state_dict(policy_net.state_dict())
 
-# Long-term memory (persistent, semantic search)
-long_term = LongTermMemory(
-    capacity=1000,
-    storage_path="memory.json",
-)
+optimizer = torch.optim.Adam(policy_net.parameters(), lr=1e-4)
+
+def dqn_update(batch_states, batch_actions, batch_rewards, batch_next_states, batch_dones):
+    # Current Q values
+    q_values = policy_net(batch_states)
+    q_values = q_values.gather(1, batch_actions.unsqueeze(-1)).squeeze(-1)
+    
+    # Target Q values
+    with torch.no_grad():
+        next_q_values = target_net(batch_next_states)
+        next_q_max = next_q_values.max(1)[0]
+        targets = batch_rewards + (1 - batch_dones) * 0.99 * next_q_max
+    
+    # Loss
+    loss = F.mse_loss(q_values, targets)
+    
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    
+    return loss.item()
+
+# Update target network periodically
+def update_target():
+    target_net.load_state_dict(policy_net.state_dict())
 ```
-
-### Workflows
-
-Create multi-step automated workflows:
-
-```python
-from torchagentic.workflows import Workflow, Task
-
-workflow = Workflow(name="My Workflow")
-
-# Add tasks with dependencies
-workflow.add_task(
-    name="Step 1",
-    func=step1_func,
-)
-
-workflow.add_task(
-    name="Step 2",
-    func=step2_func,
-    dependencies=["Step 1"],
-)
-
-# Execute
-results = await workflow.execute(parallel=True)
-```
-
-### Multi-Agent Systems
-
-```python
-from torchagentic.workflows import MultiAgentOrchestrator
-
-orchestrator = MultiAgentOrchestrator()
-
-# Register agents
-orchestrator.register_agents([agent1, agent2, agent3])
-
-# Collaborative task
-results = await orchestrator.execute_collaborative_task(
-    task_description="Solve this problem together",
-    max_rounds=5,
-)
-```
-
-## LLM Integrations
-
-### Local LLM
-
-```python
-from torchagentic.llms.local import LocalLLM
-
-llm = LocalLLM(
-    model_id="microsoft/phi-2",
-    device="cuda",  # or "cpu", "mps"
-)
-```
-
-### Mock LLM (for testing)
-
-```python
-from torchagentic.llms.local import MockLLM
-
-llm = MockLLM(response="Mock response for testing")
-```
-
-## Configuration
-
-```python
-from torchagentic import Config
-
-config = Config(
-    llm_provider="local",
-    llm_model="microsoft/phi-2",
-    temperature=0.7,
-    max_tokens=2048,
-    verbose=True,
-)
-
-# Save config
-config.save("config.json")
-
-# Load config
-config = Config.from_file("config.json")
-
-# Load from environment
-config = Config.from_env()
-```
-
-## CLI Usage
-
-```bash
-# Chat with an agent
-torchagentic chat --model microsoft/phi-2
-
-# Show information
-torchagentic info
-
-# Show version
-torchagentic version
-```
-
-## Examples
-
-See the `examples/` directory for complete examples:
-
-- `basic_agent.py` - Simple agent creation
-- `tools_example.py` - Using tools with agents
-- `memory_example.py` - Memory systems
-- `workflow_example.py` - Workflow orchestration
-- `multi_agent.py` - Multi-agent collaboration
 
 ## API Reference
 
-### Core Classes
+### Base Classes
 
-| Class | Description |
-|-------|-------------|
-| `Agent` | Main agent class |
-| `BaseAgent` | Abstract base agent |
-| `Message` | Conversation message |
-| `Conversation` | Message history manager |
-| `AgentResponse` | Agent execution response |
+```python
+from torchagentic import BaseAgentModel, ModelConfig
 
-### Tool Classes
+# Configuration
+config = ModelConfig(
+    input_dim=64,
+    action_dim=4,
+    hidden_dims=[256, 256],
+    activation="relu",
+    dropout=0.0,
+)
 
-| Class | Description |
-|-------|-------------|
-| `Tool` | Base tool class |
-| `FunctionTool` | Function-based tool |
-| `ToolRegistry` | Tool registration |
-| `ToolManager` | Tool execution manager |
-| `@tool` | Tool decorator |
+# All models inherit from BaseAgentModel
+model = YourModel(config)
 
-### Memory Classes
+# Common methods
+model.forward(x)                    # Forward pass
+model.get_action(obs, deterministic)  # Get action
+model.get_value(obs)                # Get value estimate
+model.save("path.pt")               # Save checkpoint
+model.load("path.pt")               # Load checkpoint
+model.get_num_params()              # Count parameters
+```
 
-| Class | Description |
-|-------|-------------|
-| `BaseMemory` | Abstract memory base |
-| `ShortTermMemory` | LRU memory |
-| `LongTermMemory` | Persistent memory |
-| `MemoryEntry` | Memory record |
+### Utilities
 
-### Workflow Classes
+```python
+from torchagentic import orthogonal_init_, RunningNorm, DiagGaussian
 
-| Class | Description |
-|-------|-------------|
-| `Workflow` | Task workflow |
-| `Task` | Workflow task |
-| `Orchestrator` | Workflow manager |
-| `MultiAgentOrchestrator` | Multi-agent manager |
+# Weight initialization
+orthogonal_init_(layer, gain=1.0)
+
+# Normalization
+norm = RunningNorm(256)
+
+# Distributions
+dist = DiagGaussian(mean, std)
+sample = dist.sample()
+log_prob = dist.log_prob(action)
+```
 
 ## Contributing
 
@@ -360,7 +327,13 @@ See the `examples/` directory for complete examples:
 
 MIT License - see [LICENSE](LICENSE) for details.
 
-## Support
+## Citation
 
-- GitHub Issues: https://github.com/liodon-ai/torchagentic/issues
-- Documentation: https://github.com/liodon-ai/torchagentic#readme
+```bibtex
+@software{torchagentic2024,
+  title = {TorchAgentic: PyTorch Model Definitions for AI Agents},
+  author = {Liodon AI},
+  year = {2024},
+  url = {https://github.com/liodon-ai/torchagentic}
+}
+```

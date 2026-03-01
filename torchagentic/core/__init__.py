@@ -1,20 +1,7 @@
 """
-Core module for TorchAgentic.
-
-Contains the fundamental building blocks for AI agents including base agent classes,
-message handling, and response structures.
+Core module - Base classes and configurations.
 """
 
-from torchagentic.core.agent import Agent, BaseAgent
-from torchagentic.core.message import Message, MessageRole, Conversation
-from torchagentic.core.response import AgentResponse, ResponseStatus
+from torchagentic.models.base import BaseAgentModel, ModelConfig
 
-__all__ = [
-    "Agent",
-    "BaseAgent",
-    "Message",
-    "MessageRole",
-    "Conversation",
-    "AgentResponse",
-    "ResponseStatus",
-]
+__all__ = ["BaseAgentModel", "ModelConfig"]

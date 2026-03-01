@@ -1,16 +1,14 @@
 """
-Memory module for TorchAgentic.
-
-Provides memory systems for agents to store and retrieve information.
+Memory module - Memory-augmented neural networks.
 """
 
-from torchagentic.memory.base import Memory, BaseMemory
-from torchagentic.memory.short_term import ShortTermMemory
-from torchagentic.memory.long_term import LongTermMemory
+from torchagentic.memory.core import MemoryMatrix, DifferentiableMemory
+from torchagentic.memory.ntm import NeuralTuringMachine
+from torchagentic.memory.dnc import DifferentiableNeuralComputer
 
 __all__ = [
-    "Memory",
-    "BaseMemory",
-    "ShortTermMemory",
-    "LongTermMemory",
+    "MemoryMatrix",
+    "DifferentiableMemory",
+    "NeuralTuringMachine",
+    "DifferentiableNeuralComputer",
 ]

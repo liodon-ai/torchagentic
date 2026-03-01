@@ -1,57 +1,90 @@
 """
-TorchAgentic - A PyTorch-based library for building AI agents and agentic workflows.
+TorchAgentic - PyTorch Model Definitions for AI Agents.
 
-This library provides a comprehensive framework for creating, managing, and orchestrating
-AI agents with support for tool calling, memory management, and multi-agent workflows.
+A library of neural network architectures for building trainable AI agents,
+including RL agents, transformer-based models, memory-augmented networks,
+and multi-agent systems.
 """
 
 __version__ = "0.1.0"
 __author__ = "Liodon AI"
 
-from torchagentic.core.agent import Agent, BaseAgent
-from torchagentic.core.message import Message, MessageRole, Conversation
-from torchagentic.core.response import AgentResponse, ResponseStatus
-from torchagentic.tools.base import Tool, ToolRegistry, tool
-from torchagentic.tools.manager import ToolManager
-from torchagentic.memory.base import Memory, BaseMemory
-from torchagentic.memory.short_term import ShortTermMemory
-from torchagentic.memory.long_term import LongTermMemory
-from torchagentic.workflows.workflow import Workflow, Task
-from torchagentic.workflows.orchestrator import Orchestrator
-from torchagentic.llms.base import BaseLLM, LLMConfig
-from torchagentic.llms.local import LocalLLM
-from torchagentic.utils.config import Config
-from torchagentic.utils.logging import setup_logging, get_logger
+# Core models
+from torchagentic.models.base import BaseAgentModel, ModelConfig
+from torchagentic.models.mlp import MLPNetwork
+from torchagentic.models.cnn import CNNNetwork, NatureCNN, ResNetNetwork
+from torchagentic.models.rnn import RNNNetwork, LSTMAgent, GRUAgent
+
+# RL Agent Models
+from torchagentic.rl.dqn import DQN, DuelingDQN, NoisyDQN
+from torchagentic.rl.ppo import PPOActor, PPOCritic, PPOActorCritic
+from torchagentic.rl.a3c import A3CNetwork
+from torchagentic.rl.sac import SACActor, SACCritic, SACValue
+from torchagentic.rl.td3 import TD3Actor, TD3Critic
+
+# Transformer-based models
+from torchagentic.transformers.agent import TransformerAgent, DecisionTransformer
+from torchagentic.transformers.perceiver import PerceiverAgent
+from torchagentic.transformers.attention import SelfAttention, MultiHeadAttention
+
+# Memory-augmented networks
+from torchagentic.memory.core import MemoryMatrix, DifferentiableMemory
+from torchagentic.memory.ntm import NeuralTuringMachine
+from torchagentic.memory.dnc import DifferentiableNeuralComputer
+
+# Multi-agent architectures
+from torchagentic.multiagent.base import MultiAgentBase
+from torchagentic.multiagent.maddpg import MADDPGAgent
+from torchagentic.multiagent.qmix import QMIXNetwork, VDNNetwork
+
+# Utilities
+from torchagentic.utils.initialization import orthogonal_init_, xavier_init_
+from torchagentic.utils.normalization import RunningNorm, LayerNorm2D
 
 __all__ = [
-    # Core
-    "Agent",
-    "BaseAgent",
-    "Message",
-    "MessageRole",
-    "Conversation",
-    "AgentResponse",
-    "ResponseStatus",
-    # Tools
-    "Tool",
-    "ToolRegistry",
-    "tool",
-    "ToolManager",
+    # Base
+    "BaseAgentModel",
+    "ModelConfig",
+    # Core architectures
+    "MLPNetwork",
+    "CNNNetwork",
+    "NatureCNN",
+    "ResNetNetwork",
+    "RNNNetwork",
+    "LSTMAgent",
+    "GRUAgent",
+    # RL Models
+    "DQN",
+    "DuelingDQN",
+    "NoisyDQN",
+    "PPOActor",
+    "PPOCritic",
+    "PPOActorCritic",
+    "A3CNetwork",
+    "SACActor",
+    "SACCritic",
+    "SACValue",
+    "TD3Actor",
+    "TD3Critic",
+    # Transformers
+    "TransformerAgent",
+    "DecisionTransformer",
+    "PerceiverAgent",
+    "SelfAttention",
+    "MultiHeadAttention",
     # Memory
-    "Memory",
-    "BaseMemory",
-    "ShortTermMemory",
-    "LongTermMemory",
-    # Workflows
-    "Workflow",
-    "Task",
-    "Orchestrator",
-    # LLMs
-    "BaseLLM",
-    "LLMConfig",
-    "LocalLLM",
+    "MemoryMatrix",
+    "DifferentiableMemory",
+    "NeuralTuringMachine",
+    "DifferentiableNeuralComputer",
+    # Multi-agent
+    "MultiAgentBase",
+    "MADDPGAgent",
+    "QMIXNetwork",
+    "VDNNetwork",
     # Utils
-    "Config",
-    "setup_logging",
-    "get_logger",
+    "orthogonal_init_",
+    "xavier_init_",
+    "RunningNorm",
+    "LayerNorm2D",
 ]
