@@ -41,6 +41,22 @@ from torchagentic.multiagent.qmix import QMIXNetwork, VDNNetwork
 from torchagentic.utils.initialization import orthogonal_init_, xavier_init_
 from torchagentic.utils.normalization import RunningNorm, LayerNorm2D
 
+# PyTorch 2.0 compilation support
+try:
+    from torchagentic.compile import (
+        CompileConfig,
+        compile_model,
+        compile_function,
+        optimize_for_inference,
+        optimize_for_training,
+        optimize_speed,
+        optimize_memory,
+        is_compiled,
+    )
+    COMPILE_SUPPORT = True
+except ImportError:
+    COMPILE_SUPPORT = False
+
 __all__ = [
     # Base
     "BaseAgentModel",
@@ -87,4 +103,14 @@ __all__ = [
     "xavier_init_",
     "RunningNorm",
     "LayerNorm2D",
+    # Compile (if available)
+    "CompileConfig",
+    "compile_model",
+    "compile_function",
+    "optimize_for_inference",
+    "optimize_for_training",
+    "optimize_speed",
+    "optimize_memory",
+    "is_compiled",
+    "COMPILE_SUPPORT",
 ]

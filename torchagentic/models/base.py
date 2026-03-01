@@ -12,6 +12,14 @@ import torch
 import torch.nn as nn
 
 
+# Import compile support
+try:
+    from torchagentic.compile.core import CompileConfig, compile_model, is_compiled
+    COMPILE_AVAILABLE = True
+except ImportError:
+    COMPILE_AVAILABLE = False
+
+
 @dataclass
 class ModelConfig:
     """
@@ -173,10 +181,94 @@ class BaseAgentModel(nn.Module, ABC):
         """Unfreeze all parameters."""
         for param in self.parameters():
             param.requires_grad = True
+
+    def compile(
+        self,
+        mode: str = "default",
+        dynamic: bool = False,
+        fullgraph: bool = False,
+        backend: str = "inductor",
+        warmup: bool = True,
+        example_inputs: Optional[tuple[torch.Tensor, ...]] = None,
+    ) -> "BaseAgentModel":
+        """
+        Compile the model with torch.compile() for PyTorch 2.0+.
+        
+        Args:
+            mode: Compilation mode ('default', 'reduce-overhead', 'max-autotune')
+            dynamic: Enable dynamic shapes
+            fullgraph: Compile entire graph
+            backend: Backend to use
+            warmup: Run warmup iteration
+            example_inputs: Example inputs for warmup
+        
+        Returns:
+            Self for method chaining
+        
+        Example:
+            >>> model = MLPNetwork(config)
+            >>> model.compile(mode="reduce-overhead")
+        """
+        if not COMPILE_AVAILABLE:
+            import warnings
+            warnings.warn(
+                f"torch.compile() requires PyTorch 2.0+. Current: {torch.__version__}"
+            )
+            return self
+        
+        # Create example inputs if not provided
+        if example_inputs is None:
+            try:
+                batch_size = 1 if mode == "reduce-overhead" else 4
+                if hasattr(self, "image_input") and self.image_input:
+                    shape = (batch_size, *getattr(self, "image_shape", (3, 84, 84)))
+                else:
+                    shape = (batch_size, self.config.input_dim)
+                example_inputs = (torch.randn(shape),)
+            except Exception:
+                example_inputs = None
+        
+        # Compile
+        compiled = compile_model(
+            self,
+            config=CompileConfig(
+                mode=mode,
+                dynamic=dynamic,
+                fullgraph=fullgraph,
+                backend=backend,
+            ),
+            example_inputs=example_inputs,
+            warmup=warmup,
+        )
+        
+        # Copy compiled state back to self
+        self.__dict__.update(compiled.__dict__)
+        self._compiled = True
+        self._compile_config = CompileConfig(
+            mode=mode,
+            dynamic=dynamic,
+            fullgraph=fullgraph,
+            backend=backend,
+        )
+        
+        return self
     
+    @property
+    def is_compiled(self) -> bool:
+        """Check if model is compiled."""
+        return getattr(self, "_compiled", False) or is_compiled(self)
+    
+    def reset_compile(self) -> None:
+        """Reset compilation state."""
+        if hasattr(self, "_compiled"):
+            self._compiled = False
+        if hasattr(self, "_compile_config"):
+            self._compile_config = None
+
     def __repr__(self) -> str:
+        compiled_str = " (compiled)" if getattr(self, "_compiled", False) else ""
         return (
             f"{self.__class__.__name__}("
             f"params={self.get_num_params():,}, "
-            f"trainable={self.get_trainable_params():,})"
+            f"trainable={self.get_trainable_params():,}{compiled_str})"
         )
