@@ -2,7 +2,7 @@
 
 **PyTorch Model Definitions for AI Agents**
 
-A comprehensive library of neural network architectures for building trainable AI agents, including reinforcement learning models, transformer-based agents, memory-augmented networks, and multi-agent systems.
+A comprehensive library of deep learning architectures for building trainable AI agents, including reinforcement learning models, transformer-based agents, memory-augmented networks, and multi-agent systems.
 
 ## Features
 
