@@ -272,6 +272,24 @@ compiled_model = compile_model(model, config=config)
 | `QMIXNetwork` | QMIX | Cooperative |
 | `VDNNetwork` | VDN | Cooperative |
 
+## Examples
+
+The `examples/` directory contains complete, runnable examples:
+
+| Example | Description |
+|---------|-------------|
+| `examples/dqn_training.py` | Full DQN training loop with replay buffer |
+| `examples/ppo_training.py` | Complete PPO training with GAE and rollout buffer |
+| `examples/decision_transformer.py` | Offline RL with Decision Transformer |
+| `examples/maddpg_training.py` | Multi-agent training with MADDPG |
+| `examples/compile_example.py` | PyTorch 2.0 compilation examples |
+| `examples/compile_benchmark.py` | Performance benchmarks for compiled models |
+
+To run an example:
+```bash
+python examples/dqn_training.py
+```
+
 ## Training Example
 
 ### PPO Training Loop
